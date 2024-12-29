@@ -15,9 +15,13 @@ st.set_page_config(
 st.title("✈️ Air Travel Dashboard")
 st.markdown("Analyze the monthly air travel dataset and explore trends and patterns.")
 
-# Load the dataset from GitHub
-dataset_url = "https://github.com/TabeerJehanzeb783/DATA-Visualization/blob/main/airtravel.csv"
-df = pd.read_csv(dataset_url)
+# Load the dataset from GitHub with error handling
+dataset_url = "https://raw.githubusercontent.com/TabeerJehanzeb783/DATA-Visualization/main/airtravel.csv"
+try:
+    df = pd.read_csv(dataset_url, on_bad_lines="skip")  # Skip problematic rows
+except Exception as e:
+    st.error(f"Error loading dataset: {e}")
+    st.stop()
 
 # Display the dataset
 st.subheader("Dataset Preview")
@@ -30,7 +34,7 @@ st.write(df.describe(include="all"))
 # Column Selection for Visualizations
 st.sidebar.header("Visualization Options")
 all_columns = df.columns.tolist()
-selected_columns = st.sidebar.multiselect("Select Columns for Visualization", all_columns)
+selected_columns = st.sidebar.multiselect("Select Columns for Visualization", all_columns[1:])  # Skip 'Month' for selection
 
 # Visualization Section
 if selected_columns:
@@ -44,7 +48,7 @@ if selected_columns:
     if st.checkbox("Show Bar Chart"):
         st.bar_chart(df[selected_columns])
 
-    # Histograms
+    # Histograms for each selected column
     if st.checkbox("Show Histograms"):
         for column in selected_columns:
             if pd.api.types.is_numeric_dtype(df[column]):
